@@ -54,7 +54,17 @@ def interpolate_to_slice(data, points, interp_type='linear'):
         x.name: xr.DataArray(points[:, 0], dims='index', attrs=x.attrs),
         y.name: xr.DataArray(points[:, 1], dims='index', attrs=y.attrs)
     }, method=interp_type)
-    data_sliced.coords['index'] = range(len(points))
+    
+    data_sliced.coords['distance'] = xr.DataArray(
+        np.linalg.norm(points - points[0], axis=1),
+        dims='index',
+        coords={'index': range(len(points))},
+        attrs=(
+            {'units': x.attrs['units']}
+            if getattr(x.attrs, 'units', None) == getattr(y.attrs, 'units', None)
+            else {}
+        )
+    )
 
     # Bug in xarray: interp strips units
     if is_quantity(data.data) and not is_quantity(data_sliced.data):
