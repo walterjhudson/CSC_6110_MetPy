@@ -43,7 +43,7 @@ end = (35.5, -65.0)
 ##############################
 # Get the cross section, and convert lat/lon to supplementary coordinates:
 
-cross = cross_section(data, start, end).set_coords(('lat', 'lon'))
+cross = cross_section(data, start, end, steps=200, interp_type='linear', path_type='linear').set_coords(('lat', 'lon'))
 print(cross)
 
 ##############################
