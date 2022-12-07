@@ -35,8 +35,9 @@ ds = xr.Dataset(
 data = ds.metpy.parse_cf()['temperature']
 
 path = np.array([[10.0, 30.],
-                    [30.0, 30.],
+                    [30.0, 40.],
                     [40.0, 30.],
                     [45.0, 30.]])
 test_slice = interpolate_to_slice(data, path)
+print("Distance : ")
 print(test_slice["distance"].data)
