@@ -6,8 +6,9 @@
 import numpy as np
 import pytest
 import xarray as xr
+import array
 
-from metpy.interpolate import cross_section, geodesic, interpolate_to_slice
+from metpy.interpolate import cross_section, geodesic,linear, interpolate_to_slice
 from metpy.testing import assert_array_almost_equal, needs_cartopy
 from metpy.units import units
 
@@ -106,6 +107,32 @@ def test_interpolate_to_slice_against_selection(test_ds_lonlat):
     # Coordinates differ, so just compare the data
     assert_array_almost_equal(true_slice.metpy.unit_array, test_slice.metpy.unit_array, 5)
 
+def test_interpolate_to_slice_against_selection_and_check_distance(test_ds_lonlat):
+    """Test interpolate_to_slice on a simple operation."""
+    data = test_ds_lonlat['temperature']
+    path = np.array([[265.0, 30.],
+                     [265.0, 36.],
+                     [265.0, 42.]])
+    test_slice = interpolate_to_slice(data, path,'linear','distance')
+    true_slice = data.sel({'lat': [30., 36., 42.], 'lon': 265.0})
+    # ensure that there is a distance variable in teh test slice
+    assert 'distance' in test_slice.coords;
+
+
+def test_interpolate_to_slice_against_selection_and_check_key_called_blah(test_ds_lonlat):
+    """Test interpolate_to_slice on a simple operation."""
+    data = test_ds_lonlat['temperature']
+    path = np.array([[265.0, 30.],
+                     [265.0, 36.],
+                     [265.0, 42.]])
+    test_slice = interpolate_to_slice(data, path,'linear','blah')
+    true_slice = data.sel({'lat': [30., 36., 42.], 'lon': 265.0})
+    # ensure that there is a distance variable in teh test slice
+    assert 'blah' in test_slice.coords;
+
+
+
+
 
 @needs_cartopy
 def test_geodesic(test_ds_xy):
@@ -120,6 +147,15 @@ def test_geodesic(test_ds_xy):
                       [2.42752546e+06, -2.67710326e+05],
                       [2.99993290e+06, -9.39107692e+02]])
     assert_array_almost_equal(path, truth, 0)
+
+def test_linear(test_ds_xy):
+    """Test the geodesic construction."""
+    crs = test_ds_xy['temperature']
+    path = linear(crs, (36.46, -112.45), (42.95, -68.74), 7)
+    truth = np.array([[22.63925442, 50.07171631, -105.35946087, 44.12320305],
+                [4.86792442, 55.04919702, -98.03867942, 55.04919702, -83.15132099, 44.84249388],
+                [-54.91925442, 50.07171631, -75.83053913, 44.12320305]])
+    assert  path == truth
 
 
 @needs_cartopy
